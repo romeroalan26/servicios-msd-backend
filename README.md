@@ -330,6 +330,6 @@ Este proyecto está bajo la Licencia ISC. Ver el archivo `LICENSE` para más det
 
 ## 📞 Contacto
 
-- **Desarrollador**: Alan2
+- **Desarrollador**: KODEVAR
 - **Proyecto**: Sistema de Gestión de Servicios MSD
 - **Versión**: 1.0.0
