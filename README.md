@@ -242,6 +242,43 @@ Este script verifica:
 
 ## 🔐 Credenciales de Prueba
 
+### ⚠️ IMPORTANTE: Configuración de Seguridad
+
+**🚨 ALERTA DE SEGURIDAD**: Este proyecto contiene contraseñas por defecto para desarrollo. Para producción, DEBES cambiar todas las contraseñas.
+
+#### Configuración de Variables de Entorno
+
+1. **Copiar el archivo de ejemplo**:
+
+   ```bash
+   cp env.example .env
+   ```
+
+2. **Configurar variables de seguridad**:
+
+   ```bash
+   # Contraseñas (CAMBIAR EN PRODUCCIÓN)
+   ADMIN_PASSWORD=tu_password_admin_seguro
+   EMPLOYEE_PASSWORD=tu_password_empleado_seguro
+
+   # JWT Secret (CAMBIAR EN PRODUCCIÓN)
+   JWT_SECRET=tu_jwt_secret_super_seguro_y_largo
+
+   # Base de datos
+   DB_PASSWORD=tu_password_bd_seguro
+   ```
+
+#### 🔒 Mejores Prácticas de Seguridad
+
+- ✅ **Nunca** subir archivos `.env` al repositorio
+- ✅ **Cambiar** todas las contraseñas por defecto en producción
+- ✅ **Usar** contraseñas fuertes (mínimo 12 caracteres)
+- ✅ **Rotar** JWT secrets periódicamente
+- ✅ **Limitar** acceso a la base de datos
+- ✅ **Usar** HTTPS en producción
+
+#### 🛡️ Contraseñas por Defecto (SOLO DESARROLLO)
+
 ### Administrador
 
 - **Email**: admin@serviciosmsd.com
