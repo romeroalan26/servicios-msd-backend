@@ -147,10 +147,11 @@ GET /api/servicios?page=2&limit=10&sortBy=s.created_at&sortOrder=desc
    DB_USER=postgres
    DB_HOST=localhost
    DB_NAME=servicios_msd
-   DB_PASSWORD=password
+   DB_PASSWORD=tu_password_aqui
    DB_PORT=5432
-   JWT_SECRET=servicios_msd_jwt_secret_2024
+   JWT_SECRET=tu_jwt_secret_aqui
    PORT=3000
+   NODE_ENV=development
    ```
 
 4. **Inicializar base de datos**
@@ -240,13 +241,9 @@ Este script verifica:
 - ✅ Definición de todos los esquemas
 - ✅ Configuración de tags y servidores
 
-## 🔐 Credenciales de Prueba
+## 🔐 Configuración de Seguridad
 
-### ⚠️ IMPORTANTE: Configuración de Seguridad
-
-**🚨 ALERTA DE SEGURIDAD**: Este proyecto contiene contraseñas por defecto para desarrollo. Para producción, DEBES cambiar todas las contraseñas.
-
-#### Configuración de Variables de Entorno
+### Variables de Entorno
 
 1. **Copiar el archivo de ejemplo**:
 
@@ -254,41 +251,30 @@ Este script verifica:
    cp env.example .env
    ```
 
-2. **Configurar variables de seguridad**:
+2. **Configurar variables de entorno**:
 
    ```bash
-   # Contraseñas (CAMBIAR EN PRODUCCIÓN)
-   ADMIN_PASSWORD=tu_password_admin_seguro
-   EMPLOYEE_PASSWORD=tu_password_empleado_seguro
-
-   # JWT Secret (CAMBIAR EN PRODUCCIÓN)
-   JWT_SECRET=tu_jwt_secret_super_seguro_y_largo
-
    # Base de datos
-   DB_PASSWORD=tu_password_bd_seguro
+   DB_USER=postgres
+   DB_HOST=localhost
+   DB_NAME=servicios_msd
+   DB_PASSWORD=tu_password_aqui
+   DB_PORT=5432
+
+   # Servidor
+   PORT=3000
+   NODE_ENV=development
+
+   # JWT Secret (cambiar en producción)
+   JWT_SECRET=tu_jwt_secret_aqui
    ```
 
-#### 🔒 Mejores Prácticas de Seguridad
+### 🔒 Mejores Prácticas
 
 - ✅ **Nunca** subir archivos `.env` al repositorio
 - ✅ **Cambiar** todas las contraseñas por defecto en producción
-- ✅ **Usar** contraseñas fuertes (mínimo 12 caracteres)
-- ✅ **Rotar** JWT secrets periódicamente
+- ✅ **Usar** contraseñas fuertes
 - ✅ **Limitar** acceso a la base de datos
-- ✅ **Usar** HTTPS en producción
-
-#### 🛡️ Contraseñas por Defecto (SOLO DESARROLLO)
-
-### Administrador
-
-- **Email**: admin@serviciosmsd.com
-- **Password**: admin123
-
-### Empleados
-
-- **Email**: empleado1@serviciosmsd.com
-- **Password**: empleado123
-- **Prioridad**: 1-20 (rotación anual)
 
 ## 🏗️ Estructura del Proyecto
 
