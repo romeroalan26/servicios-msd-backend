@@ -13,3 +13,10 @@ export interface CreateTurnoData {
   nombre: string;
   descripcion: string;
 }
+
+export interface UpdateTurnoData {
+  codigo?: string;
+  nombre?: string;
+  descripcion?: string;
+  activo?: boolean;
+}

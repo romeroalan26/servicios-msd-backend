@@ -17,3 +17,12 @@ export interface CreateEmpleadoData {
   rol: 'empleado' | 'admin';
   prioridad?: number;
 }
+
+export interface UpdateEmpleadoData {
+  nombre?: string;
+  email?: string;
+  password?: string;
+  rol?: 'empleado' | 'admin';
+  prioridad?: number;
+  activo?: boolean;
+}

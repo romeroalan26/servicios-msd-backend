@@ -1,5 +1,9 @@
 import pool from '../config/database';
 import { Seleccion, CreateSeleccionData } from '../models/seleccion';
+import { NotificationService } from './notificationService';
+import { AuditService } from './auditService';
+import { EmpleadoService } from './empleadoService';
+import { ServicioService } from './servicioService';
 
 export interface EmpleadoConPrioridad {
   id: number;
@@ -147,6 +151,44 @@ export class SeleccionService {
 
     // Rotar las prioridades después de la selección
     await this.rotarPrioridades(seleccionData.empleado_id);
+
+    // Obtener información del empleado y servicio para notificaciones
+    const empleado = await EmpleadoService.getEmpleadoById(
+      seleccionData.empleado_id,
+    );
+    const servicio = await ServicioService.getServicioById(
+      seleccionData.servicio_id,
+    );
+
+    if (empleado && servicio) {
+      // Obtener información del primer día del servicio para la notificación
+      const servicioConDias = await ServicioService.getServicioConDias(
+        servicio.id,
+      );
+      const primerDia = servicioConDias?.dias?.[0];
+
+      if (primerDia) {
+        // Enviar notificaciones
+        await NotificationService.sendAllNotifications({
+          empleado,
+          servicio,
+          fecha: primerDia.fecha.toISOString().split('T')[0],
+          tanda: primerDia.tanda,
+          turnoNombre: primerDia.turno_nombre,
+        });
+      }
+
+      // Registrar en auditoría
+      await AuditService.logSelection(
+        seleccionData.empleado_id,
+        seleccionData.servicio_id,
+        seleccionData.anno,
+        {
+          empleado_nombre: empleado.nombre,
+          servicio_nombre: servicio.nombre,
+        },
+      );
+    }
 
     return result.rows[0];
   }

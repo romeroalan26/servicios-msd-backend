@@ -8,13 +8,20 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerJSDoc from 'swagger-jsdoc';
 import { swaggerOptions } from './swagger/swaggerOptions';
 import authRoutes from './routes/authRoutes';
+import empleadoRoutes from './routes/empleadoRoutes';
 import servicioRoutes from './routes/servicioRoutes';
 import seleccionRoutes from './routes/seleccionRoutes';
+import adminRoutes from './routes/adminRoutes';
+import turnoRoutes from './routes/turnoRoutes';
+import { NotificationService } from './services/notificationService';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
+
+// Inicializar servicios
+NotificationService.initialize();
 
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 
@@ -55,11 +62,20 @@ app.get('/api/health', (req, res) => {
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
 
+// Rutas de empleados
+app.use('/api/empleados', empleadoRoutes);
+
 // Rutas de servicios
 app.use('/api/servicios', servicioRoutes);
 
 // Rutas de selecciones
 app.use('/api/selecciones', seleccionRoutes);
+
+// Rutas de turnos
+app.use('/api/turnos', turnoRoutes);
+
+// Rutas de administración
+app.use('/api/admin', adminRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

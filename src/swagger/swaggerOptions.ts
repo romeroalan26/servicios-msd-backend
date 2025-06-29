@@ -123,6 +123,35 @@ export const swaggerOptions = {
             },
           },
         },
+        Pagination: {
+          type: 'object',
+          properties: {
+            page: {
+              type: 'integer',
+              description: 'Número de página actual',
+            },
+            limit: {
+              type: 'integer',
+              description: 'Elementos por página',
+            },
+            totalElements: {
+              type: 'integer',
+              description: 'Total de elementos disponibles',
+            },
+            totalPages: {
+              type: 'integer',
+              description: 'Total de páginas',
+            },
+            hasNext: {
+              type: 'boolean',
+              description: 'Indica si hay página siguiente',
+            },
+            hasPrevious: {
+              type: 'boolean',
+              description: 'Indica si hay página anterior',
+            },
+          },
+        },
         Empleado: {
           type: 'object',
           properties: {
@@ -262,6 +291,44 @@ export const swaggerOptions = {
             },
           },
         },
+        Turno: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              description: 'ID único del turno',
+            },
+            codigo: {
+              type: 'string',
+              maxLength: 10,
+              description: 'Código único del turno (ej: "CA", "OF", "GU")',
+            },
+            nombre: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Nombre del turno',
+            },
+            descripcion: {
+              type: 'string',
+              maxLength: 500,
+              description: 'Descripción detallada del turno',
+            },
+            activo: {
+              type: 'boolean',
+              description: 'Indica si el turno está activo',
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de creación',
+            },
+            updated_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'Fecha de última actualización',
+            },
+          },
+        },
       },
     },
     security: [
@@ -275,8 +342,16 @@ export const swaggerOptions = {
         description: 'Endpoints para autenticación y gestión de usuarios',
       },
       {
+        name: 'Empleados',
+        description: 'Endpoints para gestión de empleados, roles y prioridades',
+      },
+      {
         name: 'Servicios',
         description: 'Endpoints para gestión de servicios y días de servicio',
+      },
+      {
+        name: 'Turnos',
+        description: 'Endpoints para gestión de códigos de turno',
       },
       {
         name: 'Sistema',

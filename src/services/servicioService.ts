@@ -3,6 +3,7 @@ import {
   Servicio,
   ServicioDia,
   CreateServicioData,
+  UpdateServicioData,
   CreateServicioDiaData,
 } from '../models/servicio';
 import { Excepcion } from '../models/excepcion';
@@ -435,7 +436,7 @@ export class ServicioService {
   }
 
   /**
-   * Verifica si un empleado tiene excepciones para un día específico
+   * Obtiene las excepciones de un empleado para una fecha específica
    */
   static async getExcepcionesEmpleado(
     empleadoId: number,
@@ -443,19 +444,124 @@ export class ServicioService {
     tanda?: string,
   ): Promise<Excepcion[]> {
     let query = `
-      SELECT * FROM excepciones 
-      WHERE empleado_id = $1 
-        AND fecha = $2 
-        AND activo = true
+      SELECT e.*, t.codigo as turno_reemplazo_codigo, t.nombre as turno_reemplazo_nombre
+      FROM excepciones e
+      LEFT JOIN turnos t ON e.turno_reemplazo_id = t.id
+      WHERE e.empleado_id = $1 AND e.fecha = $2 AND e.activo = true
     `;
-    const params: (number | Date | string)[] = [empleadoId, fecha];
+
+    const params: any[] = [empleadoId, fecha];
 
     if (tanda) {
-      query += ' AND tanda = $3';
+      query += ` AND e.tanda = $3`;
       params.push(tanda);
     }
 
+    query += ` ORDER BY e.created_at DESC`;
+
     const result = await pool.query(query, params);
     return result.rows;
+  }
+
+  /**
+   * Obtiene un servicio por ID sin incluir días
+   */
+  static async getServicioById(servicioId: number): Promise<Servicio | null> {
+    try {
+      const query = `
+        SELECT id, nombre, descripcion, activo, created_at, updated_at
+        FROM servicios
+        WHERE id = $1
+      `;
+
+      const result = await pool.query(query, [servicioId]);
+
+      if (result.rows.length === 0) {
+        return null;
+      }
+
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error obteniendo servicio por ID:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Actualiza un servicio existente
+   */
+  static async updateServicio(
+    servicioId: number,
+    updateData: Partial<UpdateServicioData>,
+  ): Promise<Servicio> {
+    try {
+      const fields: string[] = [];
+      const values: any[] = [];
+      let paramIndex = 1;
+
+      // Construir campos a actualizar
+      if (updateData.nombre !== undefined) {
+        fields.push(`nombre = $${paramIndex++}`);
+        values.push(updateData.nombre);
+      }
+
+      if (updateData.descripcion !== undefined) {
+        fields.push(`descripcion = $${paramIndex++}`);
+        values.push(updateData.descripcion);
+      }
+
+      if (updateData.activo !== undefined) {
+        fields.push(`activo = $${paramIndex++}`);
+        values.push(updateData.activo);
+      }
+
+      if (fields.length === 0) {
+        throw new Error('No se proporcionaron campos para actualizar');
+      }
+
+      // Agregar updated_at y ID
+      fields.push(`updated_at = CURRENT_TIMESTAMP`);
+      values.push(servicioId);
+
+      const query = `
+        UPDATE servicios 
+        SET ${fields.join(', ')}
+        WHERE id = $${paramIndex}
+        RETURNING id, nombre, descripcion, activo, created_at, updated_at
+      `;
+
+      const result = await pool.query(query, values);
+
+      if (result.rows.length === 0) {
+        throw new Error('Servicio no encontrado');
+      }
+
+      return result.rows[0];
+    } catch (error) {
+      console.error('Error actualizando servicio:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Elimina un servicio (marca como inactivo)
+   */
+  static async deleteServicio(servicioId: number): Promise<void> {
+    try {
+      const query = `
+        UPDATE servicios 
+        SET activo = false, updated_at = CURRENT_TIMESTAMP
+        WHERE id = $1
+      `;
+
+      const result = await pool.query(query, [servicioId]);
+
+      if (result.rowCount === 0) {
+        throw new Error('Servicio no encontrado');
+      }
+    } catch (error) {
+      console.error('Error eliminando servicio:', error);
+      throw error;
+    }
   }
 }

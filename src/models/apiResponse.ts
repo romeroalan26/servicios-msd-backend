@@ -33,6 +33,8 @@ export interface PaginationOptions {
   turnoId?: number;
   incluirDias?: boolean;
   incluirExcepciones?: boolean;
+  // Filtros específicos para empleados
+  rol?: 'empleado' | 'admin';
 }
 
 export interface PaginationResult<T = any> {

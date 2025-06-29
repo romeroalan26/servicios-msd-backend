@@ -22,6 +22,12 @@ export interface CreateServicioData {
   descripcion: string;
 }
 
+export interface UpdateServicioData {
+  nombre?: string;
+  descripcion?: string;
+  activo?: boolean;
+}
+
 export interface CreateServicioDiaData {
   servicio_id: number;
   fecha: Date;
