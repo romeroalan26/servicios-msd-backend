@@ -14,11 +14,22 @@ import seleccionRoutes from './routes/seleccionRoutes';
 import adminRoutes from './routes/adminRoutes';
 import turnoRoutes from './routes/turnoRoutes';
 import { NotificationService } from './services/notificationService';
+import logger from './logger';
+import morgan from 'morgan';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
+
+// Logging HTTP requests con morgan + winston
+app.use(
+  morgan('combined', {
+    stream: {
+      write: (message: string) => logger.http(message.trim()),
+    },
+  }),
+);
 
 // Inicializar servicios
 NotificationService.initialize();
@@ -79,5 +90,5 @@ app.use('/api/admin', adminRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Servidor escuchando en puerto ${PORT}`);
+  logger.info(`Servidor escuchando en puerto ${PORT}`);
 });

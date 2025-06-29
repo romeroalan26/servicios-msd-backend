@@ -1,218 +1,93 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import pool from './database';
 import bcrypt from 'bcryptjs';
+import pool from './database';
 
-// Contraseñas por defecto para desarrollo (cambiar en producción)
 const DEFAULT_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
-const DEFAULT_EMPLOYEE_PASSWORD =
-  process.env.EMPLOYEE_PASSWORD || 'empleado123';
 
-const empleados = [
-  // Admin (sin prioridad)
-  {
-    nombre: 'Administrador Sistema',
-    email: 'admin@serviciosmsd.com',
-    password: DEFAULT_ADMIN_PASSWORD,
-    rol: 'admin' as const,
-    prioridad: null,
-  },
-  // Empleados con prioridades del 1 al 20
-  {
-    nombre: 'Juan Pérez',
-    email: 'juan.perez@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 1,
-  },
-  {
-    nombre: 'María García',
-    email: 'maria.garcia@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 2,
-  },
-  {
-    nombre: 'Carlos López',
-    email: 'carlos.lopez@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 3,
-  },
-  {
-    nombre: 'Ana Rodríguez',
-    email: 'ana.rodriguez@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 4,
-  },
-  {
-    nombre: 'Luis Martínez',
-    email: 'luis.martinez@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 5,
-  },
-  {
-    nombre: 'Carmen Sánchez',
-    email: 'carmen.sanchez@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 6,
-  },
-  {
-    nombre: 'Roberto Torres',
-    email: 'roberto.torres@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 7,
-  },
-  {
-    nombre: 'Isabel Morales',
-    email: 'isabel.morales@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 8,
-  },
-  {
-    nombre: 'Fernando Herrera',
-    email: 'fernando.herrera@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 9,
-  },
-  {
-    nombre: 'Patricia Jiménez',
-    email: 'patricia.jimenez@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 10,
-  },
-  {
-    nombre: 'Miguel Ruiz',
-    email: 'miguel.ruiz@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 11,
-  },
-  {
-    nombre: 'Sofia Vargas',
-    email: 'sofia.vargas@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 12,
-  },
-  {
-    nombre: 'Diego Castro',
-    email: 'diego.castro@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 13,
-  },
-  {
-    nombre: 'Valeria Silva',
-    email: 'valeria.silva@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 14,
-  },
-  {
-    nombre: 'Ricardo Mendoza',
-    email: 'ricardo.mendoza@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 15,
-  },
-  {
-    nombre: 'Gabriela Rojas',
-    email: 'gabriela.rojas@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 16,
-  },
-  {
-    nombre: 'Alejandro Flores',
-    email: 'alejandro.flores@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 17,
-  },
-  {
-    nombre: 'Daniela Ortiz',
-    email: 'daniela.ortiz@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 18,
-  },
-  {
-    nombre: 'Héctor Ramírez',
-    email: 'hector.ramirez@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 19,
-  },
-  {
-    nombre: 'Natalia Cruz',
-    email: 'natalia.cruz@serviciosmsd.com',
-    password: DEFAULT_EMPLOYEE_PASSWORD,
-    rol: 'empleado' as const,
-    prioridad: 20,
-  },
-];
-
-async function seedEmpleados() {
+export async function seedEmpleados() {
   try {
-    console.log('👥 Insertando empleados...');
+    console.log('🌱 Iniciando seed de empleados...');
 
+    // Verificar si ya existen empleados
+    const existingEmpleados = await pool.query(
+      'SELECT COUNT(*) as count FROM empleados',
+    );
+
+    if (parseInt(existingEmpleados.rows[0].count) > 0) {
+      console.log('✅ Empleados ya existen, saltando seed...');
+      return;
+    }
+
+    // Hash de la contraseña del admin
+    const saltRounds = 10;
+    const adminPasswordHash = await bcrypt.hash(
+      DEFAULT_ADMIN_PASSWORD,
+      saltRounds,
+    );
+
+    // Insertar admin por defecto
+    await pool.query(
+      `
+      INSERT INTO empleados (nombre, email, password_hash, rol, prioridad, activo, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+    `,
+      [
+        'Administrador Sistema',
+        'admin@serviciosmsd.com',
+        adminPasswordHash,
+        'admin',
+        null, // Los admins no tienen prioridad
+        true,
+      ],
+    );
+
+    console.log('✅ Admin creado exitosamente');
+    console.log(`📧 Email: admin@serviciosmsd.com`);
+    console.log(`🔑 Contraseña: [CONFIGURADA EN .env O DEFAULT]`);
+
+    // Crear 20 empleados de ejemplo
+    const empleados = [];
+    for (let i = 1; i <= 20; i++) {
+      const passwordHash = await bcrypt.hash(`empleado${i}`, saltRounds);
+      empleados.push({
+        nombre: `Empleado ${i}`,
+        email: `empleado${i}@serviciosmsd.com`,
+        password_hash: passwordHash,
+        rol: 'empleado',
+        prioridad: i,
+        activo: true,
+      });
+    }
+
+    // Insertar empleados en lotes
     for (const empleado of empleados) {
-      // Hash de la contraseña
-      const passwordHash = await bcrypt.hash(empleado.password, 10);
-
-      // Insertar empleado
       await pool.query(
-        `INSERT INTO empleados (nombre, email, password_hash, rol, prioridad) 
-         VALUES ($1, $2, $3, $4, $5) 
-         ON CONFLICT (email) DO NOTHING`,
+        `
+        INSERT INTO empleados (nombre, email, password_hash, rol, prioridad, activo, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+      `,
         [
           empleado.nombre,
           empleado.email,
-          passwordHash,
+          empleado.password_hash,
           empleado.rol,
           empleado.prioridad,
+          empleado.activo,
         ],
       );
     }
 
-    console.log('✅ Empleados insertados correctamente');
+    console.log('✅ 20 empleados creados exitosamente');
+    console.log('📋 Credenciales de empleados:');
+    console.log(
+      '   Ver documentación en SCRIPTS.md para credenciales de prueba',
+    );
 
-    // Mostrar resumen
-    const result = await pool.query(`
-      SELECT rol, COUNT(*) as cantidad 
-      FROM empleados 
-      GROUP BY rol 
-      ORDER BY rol
-    `);
-
-    console.log('\n📊 Resumen de empleados:');
-    result.rows.forEach((row) => {
-      console.log(`  ${row.rol}: ${row.cantidad} empleados`);
-    });
-
-    // Mostrar empleados con prioridad
-    const empleadosConPrioridad = await pool.query(`
-      SELECT nombre, prioridad 
-      FROM empleados 
-      WHERE prioridad IS NOT NULL 
-      ORDER BY prioridad
-    `);
-
-    console.log('\n🎯 Empleados con prioridad:');
-    empleadosConPrioridad.rows.forEach((emp) => {
-      console.log(`  ${emp.prioridad}. ${emp.nombre}`);
-    });
+    console.log('🎉 Seed de empleados completado exitosamente');
   } catch (error) {
-    console.error('❌ Error al insertar empleados:', error);
+    console.error('❌ Error en seed de empleados:', error);
     throw error;
   }
 }
@@ -221,7 +96,7 @@ async function seedEmpleados() {
 if (require.main === module) {
   seedEmpleados()
     .then(() => {
-      console.log('\n👥 Empleados listos');
+      console.log('Seed completado');
       process.exit(0);
     })
     .catch((error) => {
@@ -229,5 +104,3 @@ if (require.main === module) {
       process.exit(1);
     });
 }
-
-export default seedEmpleados;

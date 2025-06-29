@@ -6,6 +6,7 @@
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
+    "init-db-complete": "ts-node scripts/initDatabase.ts",
     "init-db": "ts-node src/config/initDb.ts",
     "seed-turnos": "ts-node src/config/seedTurnos.ts",
     "seed-empleados": "ts-node src/config/seedEmpleados.ts",
@@ -46,15 +47,18 @@
     "express": "^5.1.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
     "pg": "^8.16.2",
     "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
     "@types/node": "^24.0.3",
     "@types/pg": "^8.15.4",
     "@typescript-eslint/eslint-plugin": "^8.35.0",

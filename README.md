@@ -143,7 +143,10 @@ GET /api/servicios?page=2&limit=10&sortBy=s.created_at&sortOrder=desc
 3. **Configurar variables de entorno**
 
    ```bash
-   # Crear archivo .env
+   # Crear archivo .env basado en env.example
+   cp env.example .env
+
+   # Editar .env con tus credenciales
    DB_USER=postgres
    DB_HOST=localhost
    DB_NAME=servicios_msd
@@ -154,12 +157,11 @@ GET /api/servicios?page=2&limit=10&sortBy=s.created_at&sortOrder=desc
    NODE_ENV=development
    ```
 
-4. **Inicializar base de datos**
+4. **Inicializar base de datos (todo en uno)**
 
    ```bash
-   npm run init-db
-   npm run seed-turnos
-   npm run seed-empleados
+   # Script que crea tablas, inserta turnos, empleados y servicios
+   npx ts-node scripts/initDatabase.ts
    ```
 
 5. **Ejecutar en desarrollo**
@@ -169,6 +171,8 @@ GET /api/servicios?page=2&limit=10&sortBy=s.created_at&sortOrder=desc
 
 ## 🧪 Scripts Disponibles
 
+> 📖 **Documentación completa de scripts:** Ver [SCRIPTS.md](./SCRIPTS.md) para detalles de todos los scripts disponibles.
+
 ### Desarrollo
 
 - `npm run dev` - Servidor de desarrollo con nodemon
@@ -177,10 +181,11 @@ GET /api/servicios?page=2&limit=10&sortBy=s.created_at&sortOrder=desc
 
 ### Base de Datos
 
-- `npm run init-db` - Inicializar base de datos
-- `npm run seed-turnos` - Insertar códigos de turno
-- `npm run seed-empleados` - Insertar empleados de prueba
-- `npm run seed-servicios` - Insertar servicios de prueba
+- `npm run init-db-complete` - **Inicialización completa** (recomendado)
+- `npm run init-db` - Solo crear tablas
+- `npm run seed-turnos` - Solo insertar códigos de turno
+- `npm run seed-empleados` - Solo insertar empleados de prueba
+- `npm run seed-servicios` - Solo insertar servicios de prueba
 
 ### Pruebas
 
@@ -305,31 +310,4 @@ servicios-msd-backend/
 
 ### Fase 3: Funciones Administrativas
 
-- [ ] Endpoints `PUT` y `DELETE` para servicios
-- [ ] Script de reseteo anual
-- [ ] Integración de notificaciones por correo
-- [ ] Implementación de `audit_log`
-
-### Fase 4: Frontend
-
-- [ ] SPA React con Vite
-- [ ] Interfaz de login y gestión de servicios
-- [ ] Despliegue en Vercel
-
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crear una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abrir un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia ISC. Ver el archivo `LICENSE` para más detalles.
-
-## 📞 Contacto
-
-- **Desarrollador**: KODEVAR
-- **Proyecto**: Sistema de Gestión de Servicios MSD
-- **Versión**: 1.0.0
+- [ ] Endpoints `PUT` y `DELETE`

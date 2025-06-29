@@ -29,10 +29,10 @@ export class AuthController {
    *                 type: string
    *                 minLength: 6
    *                 description: Contraseña del empleado
-   *                 example: "admin123"
+   *                 example: "********"
    *           example:
    *             email: "admin@serviciosmsd.com"
-   *             password: "admin123"
+   *             password: "********"
    *     responses:
    *       200:
    *         description: Login exitoso
