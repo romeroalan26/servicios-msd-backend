@@ -803,4 +803,93 @@ export class EmpleadoController {
         );
     }
   }
+
+  /**
+   * @swagger
+   * /api/empleados/{id}/reset-password:
+   *   post:
+   *     summary: Resetear la contraseña de un empleado (solo admin)
+   *     tags: [Empleados]
+   *     security:
+   *       - bearerAuth: []
+   *     parameters:
+   *       - in: path
+   *         name: id
+   *         required: true
+   *         schema:
+   *           type: integer
+   *         description: ID del empleado
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - password
+   *             properties:
+   *               password:
+   *                 type: string
+   *                 example: "nuevaPassword123"
+   *     responses:
+   *       200:
+   *         description: Contraseña reseteada exitosamente
+   *         content:
+   *           application/json:
+   *             schema:
+   *               allOf:
+   *                 - $ref: '#/components/schemas/ApiResponse'
+   *                 - type: object
+   *                   properties:
+   *                     data:
+   *                       $ref: '#/components/schemas/Empleado'
+   *             example:
+   *               success: true
+   *               data:
+   *                 id: 24
+   *                 nombre: "Pedro Gómez"
+   *                 email: "empleado1@serviciosmsd.com"
+   *                 rol: "empleado"
+   *                 prioridad: 1
+   *                 activo: true
+   *                 created_at: "2025-06-29T00:00:00.000Z"
+   *                 updated_at: "2025-06-29T00:00:00.000Z"
+   *               message: "Contraseña reseteada exitosamente"
+   *               timestamp: "2025-06-29T00:00:00.000Z"
+   *       400:
+   *         description: Datos inválidos
+   *       401:
+   *         description: No autorizado
+   *       404:
+   *         description: Empleado no encontrado
+   *       500:
+   *         description: Error interno del servidor
+   */
+  static async resetPassword(req: Request, res: Response): Promise<void> {
+    try {
+      const empleadoId = parseInt(req.params.id);
+      const { password } = req.body;
+      if (!empleadoId || !password) {
+        res
+          .status(400)
+          .json(
+            ApiResponseBuilder.error('ID y nueva contraseña son obligatorios'),
+          );
+        return;
+      }
+      const empleado = await EmpleadoService.updateEmpleado(empleadoId, {
+        password,
+      });
+      res.json(
+        ApiResponseBuilder.success(
+          empleado,
+          'Contraseña reseteada exitosamente',
+        ),
+      );
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Error desconocido';
+      res.status(400).json(ApiResponseBuilder.error(errorMessage));
+    }
+  }
 }

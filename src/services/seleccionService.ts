@@ -401,4 +401,114 @@ export class SeleccionService {
 
     return { liberado: liberar_dia_id, tomado: tomar_dia_id };
   }
+
+  /**
+   * Devuelve el progreso de selecciones (total empleados, empleados que seleccionaron, porcentaje)
+   */
+  static async getProgresoSelecciones(anno: number): Promise<{
+    totalEmpleados: number;
+    empleadosQueSeleccionaron: number;
+    progreso: number;
+  }> {
+    // Total de empleados activos
+    const totalResult = await pool.query(
+      "SELECT COUNT(*) as total FROM empleados WHERE activo = true AND rol = 'empleado'",
+    );
+    const totalEmpleados = parseInt(totalResult.rows[0].total);
+
+    // Empleados que ya seleccionaron
+    const estadisticas = await this.getEstadisticasSelecciones(anno);
+    const empleadosQueSeleccionaron = parseInt(
+      estadisticas.empleados_con_seleccion || 0,
+    );
+
+    // Calcular porcentaje
+    const progreso =
+      totalEmpleados > 0
+        ? Math.round((empleadosQueSeleccionaron / totalEmpleados) * 100)
+        : 0;
+
+    return { totalEmpleados, empleadosQueSeleccionaron, progreso };
+  }
+
+  /**
+   * Devuelve el calendario de asignaciones para un año y mes opcional
+   */
+  static async getCalendario(anno: number, mes?: number): Promise<any[]> {
+    let query = `
+      SELECT 
+        sd.fecha,
+        sd.tanda,
+        t.codigo as turno,
+        s.id as servicio_id,
+        s.nombre as servicio_nombre,
+        e.id as empleado_id,
+        e.nombre as empleado_nombre,
+        e.prioridad as empleado_prioridad
+      FROM servicio_dias sd
+      LEFT JOIN servicios s ON sd.servicio_id = s.id
+      LEFT JOIN turnos t ON sd.turno_id = t.id
+      LEFT JOIN selecciones sel ON sel.servicio_id = s.id AND sel.anno = $1
+      LEFT JOIN empleados e ON sel.empleado_id = e.id
+      WHERE EXTRACT(YEAR FROM sd.fecha) = $1
+    `;
+    const params: any[] = [anno];
+    if (mes) {
+      query += ' AND EXTRACT(MONTH FROM sd.fecha) = $2';
+      params.push(mes);
+    }
+    query += '\nORDER BY sd.fecha, sd.tanda';
+    const result = await pool.query(query, params);
+    return result.rows.map((row) => ({
+      fecha: row.fecha,
+      tanda: row.tanda,
+      turno: row.turno,
+      servicio: {
+        id: row.servicio_id,
+        nombre: row.servicio_nombre,
+      },
+      empleado: row.empleado_id
+        ? {
+            id: row.empleado_id,
+            nombre: row.empleado_nombre,
+            prioridad: row.empleado_prioridad,
+          }
+        : null,
+    }));
+  }
+
+  /**
+   * Obtiene todas las selecciones de todos los años
+   */
+  static async getAllSelecciones(): Promise<Seleccion[]> {
+    const result = await pool.query(
+      'SELECT * FROM selecciones ORDER BY created_at ASC',
+    );
+    return result.rows;
+  }
+
+  /**
+   * Obtiene todas las selecciones de un empleado
+   */
+  static async getSeleccionesByEmpleado(
+    empleadoId: number,
+  ): Promise<Seleccion[]> {
+    const result = await pool.query(
+      'SELECT * FROM selecciones WHERE empleado_id = $1 ORDER BY anno DESC, created_at ASC',
+      [empleadoId],
+    );
+    return result.rows;
+  }
+
+  /**
+   * Elimina una selección por ID
+   * @returns true si se eliminó, false si no existía
+   */
+  static async deleteSeleccionById(id: number): Promise<boolean> {
+    const result = await pool.query(
+      'DELETE FROM selecciones WHERE id = $1 RETURNING id',
+      [id],
+    );
+    return result && result.rowCount && result.rowCount > 0 ? true : false;
+  }
 }

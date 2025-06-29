@@ -564,4 +564,14 @@ export class ServicioService {
       throw error;
     }
   }
+
+  /**
+   * Devuelve el total de servicios activos
+   */
+  static async getServiciosCount(): Promise<number> {
+    const result = await pool.query(
+      'SELECT COUNT(*) as total FROM servicios WHERE activo = true',
+    );
+    return parseInt(result.rows[0].total);
+  }
 }

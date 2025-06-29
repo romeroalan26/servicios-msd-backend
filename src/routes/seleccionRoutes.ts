@@ -29,4 +29,35 @@ router.post(
   SeleccionController.liberarSeleccion,
 );
 
+// GET /api/selecciones/progreso - Obtener progreso de selecciones
+router.get('/progreso', SeleccionController.getProgresoSelecciones);
+
+// GET /api/selecciones/calendario/:year/:month - Obtener calendario de un mes específico
+router.get('/calendario/:year/:month', SeleccionController.getCalendario);
+// GET /api/selecciones/calendario/:year - Obtener calendario de un año completo
+router.get('/calendario/:year', SeleccionController.getCalendario);
+
+// GET /api/selecciones/prioridad-actual - Obtener la prioridad actual de selección
+router.get('/prioridad-actual', SeleccionController.getPrioridadActual);
+
+// GET /api/selecciones/kpis - KPIs del dashboard
+router.get('/kpis', SeleccionController.getKpisDashboard);
+
+// Endpoints solo para admin
+router.get(
+  '/',
+  AuthMiddleware.requireAdmin,
+  SeleccionController.getAllSelecciones,
+);
+router.get(
+  '/:empleadoId',
+  AuthMiddleware.requireAdmin,
+  SeleccionController.getSeleccionesByEmpleado,
+);
+router.delete(
+  '/:id',
+  AuthMiddleware.requireAdmin,
+  SeleccionController.deleteSeleccion,
+);
+
 export default router;

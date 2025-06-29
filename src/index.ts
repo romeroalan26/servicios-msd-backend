@@ -18,6 +18,13 @@ import logger from './logger';
 import morgan from 'morgan';
 
 const app = express();
+
+// Forzar header UTF-8 en todas las respuestas JSON
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
+});
+
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
